@@ -1,0 +1,11 @@
+{
+  "name": "godeata",
+  "version": "0.1.0",
+  "private": true,
+  "description": "고연전 택시팟 매칭 수요 검증 랜딩페이지 (고대타)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

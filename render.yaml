@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: godeata
+    runtime: docker
+    plan: starter
+    region: singapore
+    numInstances: 1
+    healthCheckPath: /api/config
+    disk:
+      name: godeata-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: OPERATOR_EMAIL
+        sync: false
+      - key: RETENTION_PERIOD
+        sync: false

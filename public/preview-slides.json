@@ -1,0 +1,7 @@
+[
+  { "src": "/assets/godeata-app-screens.png", "alt": "01. 택시팟 찾기", "crop": { "x": 55, "y": 78, "width": 229, "height": 496 } },
+  { "src": "/assets/godeata-app-screens.png", "alt": "02. 택시팟 상세", "crop": { "x": 308, "y": 78, "width": 229, "height": 496 } },
+  { "src": "/assets/godeata-app-screens.png", "alt": "03. 택시팟 만들기", "crop": { "x": 561, "y": 78, "width": 229, "height": 496 } },
+  { "src": "/assets/godeata-app-screens.png", "alt": "04. 참여 결제", "crop": { "x": 814, "y": 78, "width": 229, "height": 496 } },
+  { "src": "/assets/godeata-app-screens.png", "alt": "05. 내 택시팟", "crop": { "x": 1067, "y": 78, "width": 229, "height": 496 } }
+]
