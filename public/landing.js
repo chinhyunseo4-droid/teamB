@@ -110,6 +110,39 @@ document.querySelectorAll("[data-cta]").forEach((el) => {
   el.addEventListener("click", () => track("cta_click"));
 });
 
+const timeSlotsByRoute = {
+  "10월 2일(금) | 잠실 → 목적지": [
+    "14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후",
+  ],
+  "10월 3일(토) | 목동운동장주경기장 → 안암": [
+    "14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후",
+  ],
+  "10월 3일(토) 밤 ~ 10월 4일(일) 새벽 | 안암 → 목적지": [
+    "22:00~23:00", "23:00~24:00", "10월 4일 00:00~01:00", "10월 4일 01:00~02:00", "10월 4일 02:00~03:00", "10월 4일 03:00~04:00", "10월 4일 04:00 이후",
+  ],
+};
+
+const routeSelect = document.getElementById("date");
+const timeSelect = document.getElementById("timeFrom");
+function updateTimeSlots() {
+  const slots = timeSlotsByRoute[routeSelect.value] || [];
+  const previous = timeSelect.value;
+  timeSelect.replaceChildren();
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = slots.length ? "선택해 주세요" : "날짜·구간을 먼저 선택해 주세요";
+  timeSelect.append(placeholder);
+  slots.forEach((slot) => {
+    const option = document.createElement("option");
+    option.value = slot;
+    option.textContent = slot;
+    timeSelect.append(option);
+  });
+  timeSelect.disabled = slots.length === 0;
+  if (slots.includes(previous)) timeSelect.value = previous;
+}
+routeSelect?.addEventListener("change", updateTimeSlots);
+updateTimeSlots();
 const form = document.getElementById("apply-form");
 let formStarted = false;
 form.addEventListener(
@@ -203,3 +236,53 @@ form.addEventListener("submit", async (e) => {
     submitBtn.disabled = false;
   }
 });
+
+// Early-access reservation: email only, no payment is taken on this page.
+const preorderForm = document.getElementById("preorder-form");
+if (preorderForm) {
+  const preorderStatus = document.getElementById("preorder-status");
+  const preorderSubmit = document.getElementById("preorder-submit-btn");
+  const preorderSuccess = document.getElementById("preorder-success");
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function setPreorderInvalid(name, invalid) {
+    preorderForm.querySelector(`[data-preorder-field="${name}"]`)?.classList.toggle("invalid", invalid);
+  }
+
+  preorderForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(preorderForm);
+    const email = String(data.get("email") || "").trim();
+    const consentRequired = data.get("consentRequired") === "on";
+    const emailInvalid = !emailPattern.test(email) || email.length > 120;
+    setPreorderInvalid("email", emailInvalid);
+    setPreorderInvalid("consentRequired", !consentRequired);
+    preorderForm.querySelector(".preorder-consent-error")?.classList.toggle("show", !consentRequired);
+    if (emailInvalid || !consentRequired) {
+      preorderStatus.className = "status err";
+      preorderStatus.textContent = "이메일과 필수 동의를 확인해 주세요.";
+      return;
+    }
+
+    preorderSubmit.disabled = true;
+    preorderStatus.className = "status";
+    preorderStatus.textContent = "사전 예약 알림을 등록하고 있어요…";
+    try {
+      const response = await fetch("/api/preorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, consentRequired, utm }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw result;
+      preorderForm.classList.add("hide");
+      preorderSuccess.classList.add("show");
+      preorderSuccess.focus();
+      track("preorder_submit_success");
+    } catch {
+      preorderStatus.className = "status err";
+      preorderStatus.textContent = "사전 예약 알림을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.";
+      preorderSubmit.disabled = false;
+    }
+  });
+}

@@ -41,6 +41,7 @@ const EVENT_TYPES = new Set([
   "form_start",
   "form_submit_success",
   "figma_preview",
+  "preorder_submit_success",
 ]);
 
 function buildFigmaEmbed(url) {
@@ -366,6 +367,57 @@ const server = createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true }, withCookies());
     }
 
+    if (pathname === "/api/preorder" && req.method === "POST") {
+      const body = await readBody(req);
+      const email = String(body.email || "").trim().toLowerCase();
+      const consentRequired = Boolean(body.consentRequired);
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValid || email.length > 120 || !consentRequired) {
+        return sendJson(res, 400, { error: "validation" }, withCookies());
+      }
+
+      const now = new Date().toISOString();
+      const utmFromBody = body.utm && typeof body.utm === "object" ? body.utm : {};
+      try {
+        await saveToGoogleSheets({
+          name: "사전 예약 990원",
+          email,
+          date: "정식 출시 알림",
+          timeFrom: "990원 이용 혜택",
+          origin: "",
+          destination: "",
+          consentRequired,
+        }, utmFromBody);
+      } catch {
+        return sendJson(res, 503, { error: "google_sheets_unavailable" }, withCookies());
+      }
+
+      const result = await store.mutate((db) => {
+        ensureVisitor(db, visitorId, utmFromBody, now);
+        const existing = db.preorders.find((entry) => entry.email === email);
+        const record = {
+          id: existing?.id || randomUUID(),
+          visitorId,
+          email,
+          consentRequired,
+          offerPrice: 990,
+          regularPrice: 3000,
+          createdAt: existing?.createdAt || now,
+          updatedAt: now,
+        };
+        if (existing) {
+          db.preorders[db.preorders.findIndex((entry) => entry.email === email)] = record;
+        } else {
+          db.preorders.push(record);
+        }
+        db.events.push({
+          id: randomUUID(), visitorId, type: "preorder_submit_success", at: now,
+          utm: db.visitors[visitorId].utm,
+        });
+        return { duplicateUpdate: Boolean(existing) };
+      });
+      return sendJson(res, 200, { ok: true, ...result }, withCookies());
+    }
     if (pathname === "/api/apply" && req.method === "POST") {
       const body = await readBody(req);
       const errors = [];
