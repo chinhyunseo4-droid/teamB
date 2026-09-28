@@ -57,11 +57,6 @@
 .ticket-icon { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: #f0e1df; color: var(--burgundy); font-size: 25px; flex-shrink: 0; }
 .ride-ticket strong { display: block; font-size: 14px; }
 .ride-ticket div > span { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
-.ticket-seal { margin-left: auto; font-size: 11px; color: #9b9b91; border: 1px solid #dddace; padding: 9px 5px; border-radius: 50%; transform: rotate(-15deg); }
-.art-caption { position: absolute; right: 8px; bottom: -23px; font-size: 9px; color: #929387; }
-.hero-bottom { display: flex; justify-content: space-between; margin-top: 66px !important; padding: 25px 0; border-top: 1px solid var(--line); font-size: 12px; color: #74756b; }
-.hero-bottom > span:last-child { color: #44483a; }
-.hero-bottom > span:last-child span { margin-left: 25px; }
 .landing .benefits { padding: 66px 0; background: #f1f1e9; }
 .benefits-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 35px; }
 .landing .section-kicker { font-size: 10px; letter-spacing: .12em; font-weight: 700; }
@@ -200,9 +195,7 @@
   .ride-ticket strong { font-size: 12px; }
   .ride-ticket div > span { font-size: 10px; }
   .ticket-icon { width: 35px; height: 35px; font-size: 21px; }
-  .hero-bottom { margin-top: 49px !important; font-size: 10px; padding: 21px 0; }
-  .hero-bottom > span:last-child { display: none; }
-  .landing .benefits { padding: 42px 0; }
+      .landing .benefits { padding: 42px 0; }
   .benefits-grid { grid-template-columns: 1fr 1fr; gap: 31px 24px; }
   .benefits h2 { font-size: 25px; }
   .landing .section-kicker { font-size: 9px; }
@@ -247,3 +240,12 @@
   html { scroll-behavior: auto; }
   .landing *, .landing *::before, .landing *::after { transition: none !important; animation: none !important; }
 }
+
+.apply-guidance { margin: 28px 0 18px; padding: 19px 20px; border: 1px solid #e5e3da; border-radius: 12px; background: #f7f6f1; }
+.apply-guidance h3 { margin: 0 0 11px; font-size: 13px; letter-spacing: -.03em; color: var(--ink); }
+.apply-guidance ul { margin: 0; padding-left: 16px; color: var(--muted); }
+.apply-guidance li { margin: 6px 0; font-size: 11px; line-height: 1.75; }
+@media (max-width: 760px) { .apply-guidance { padding: 16px; margin-top: 22px; } .apply-guidance li { font-size: 10px; } }
+
+.brand-symbol { text-indent: -3px; }
+.brand-symbol span { right: 7px; }

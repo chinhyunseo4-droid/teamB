@@ -71,7 +71,7 @@ carousel.addEventListener("keydown", (event) => {
 });
 trackElement.addEventListener("scroll", updatePreview, { passive: true });
 carousel.addEventListener("pointerdown", trackPreview, { once: true });
-document.getElementById("figma-open").addEventListener("click", trackPreview);
+document.getElementById("figma-open")?.addEventListener("click", trackPreview);
 new ResizeObserver(updatePreview).observe(trackElement);
 updatePreview();
 document.querySelectorAll('a[href="#privacy"]').forEach((link) => {
@@ -123,15 +123,12 @@ form.addEventListener(
 );
 
 const fields = {
-  name: (v) => v.trim().length > 0 && v.trim().length <= 40,
-  email: (v) => /^[^\s@]+@korea\.ac\.kr$/i.test(v.trim()),
-  date: (v) => /^\d{4}-\d{2}-\d{2}$/.test(v),
+  name: () => true,
+  email: (v) => v.trim().length > 0 && v.trim().length <= 80,
+  date: (v) => Boolean(v),
   timeFrom: (v) => Boolean(v),
-  timeTo: (v, all) => !v || v >= all.timeFrom,
-  origin: (v) => v.trim().length > 0,
-  destination: (v) => v.trim().length > 0,
-  partySize: (v) => ["1", "2", "3", "4"].includes(v),
-  flexible: (_v, all) => all.flexible === "true" || all.flexible === "false",
+  origin: (v) => Boolean(v),
+  destination: (v) => Boolean(v),
   consentRequired: (_v, all) => all.consentRequired === true,
 };
 
@@ -148,7 +145,6 @@ function readForm() {
     partySize: String(data.get("partySize") || ""),
     flexible: data.get("flexible"),
     consentRequired: data.get("consentRequired") === "on",
-    consentNews: data.get("consentNews") === "on",
   };
 }
 

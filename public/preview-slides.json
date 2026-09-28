@@ -1,7 +1,34 @@
 [
-  { "src": "/assets/godeata-app-screens.png", "alt": "01. 택시팟 찾기", "crop": { "x": 55, "y": 78, "width": 229, "height": 496 } },
-  { "src": "/assets/godeata-app-screens.png", "alt": "02. 택시팟 상세", "crop": { "x": 308, "y": 78, "width": 229, "height": 496 } },
-  { "src": "/assets/godeata-app-screens.png", "alt": "03. 택시팟 만들기", "crop": { "x": 561, "y": 78, "width": 229, "height": 496 } },
-  { "src": "/assets/godeata-app-screens.png", "alt": "04. 참여 결제", "crop": { "x": 814, "y": 78, "width": 229, "height": 496 } },
-  { "src": "/assets/godeata-app-screens.png", "alt": "05. 내 택시팟", "crop": { "x": 1067, "y": 78, "width": 229, "height": 496 } }
+  {
+    "src": "/assets/app-home.png",
+    "alt": "01. 택시팟 찾기"
+  },
+  {
+    "src": "/assets/app-detail.png",
+    "alt": "02. 택시팟 상세와 참여"
+  },
+  {
+    "src": "/assets/app-create.png",
+    "alt": "03. 택시팟 만들기"
+  },
+  {
+    "src": "/assets/app-payment.png",
+    "alt": "04. 보증금 결제"
+  },
+  {
+    "src": "/assets/app-my-pots.png",
+    "alt": "05. 내 택시팟"
+  },
+  {
+    "src": "/assets/app-chat.png",
+    "alt": "06. 팟 안에서 채팅"
+  },
+  {
+    "src": "/assets/app-host-verify.png",
+    "alt": "07. 방장의 탑승 인증 요청"
+  },
+  {
+    "src": "/assets/app-member-verify.png",
+    "alt": "08. 참여자의 탑승 인증"
+  }
 ]

@@ -13,6 +13,8 @@ const PORT = Number(process.env.PORT || 3000);
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-me";
 const OPERATOR_EMAIL = process.env.OPERATOR_EMAIL || "[운영팀 이메일]";
 const RETENTION_PERIOD = process.env.RETENTION_PERIOD || "[보관 기간]";
+const GOOGLE_SHEETS_WEBHOOK_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL || "";
+const GOOGLE_SHEETS_TOKEN = process.env.GOOGLE_SHEETS_TOKEN || "";
 const SERVICE_NAME = process.env.SERVICE_NAME || "고대타";
 const FIGMA_FILE_URL = process.env.FIGMA_FILE_URL || "[피그마 링크]";
 const FIGMA_EMBED_URL = process.env.FIGMA_EMBED_URL || buildFigmaEmbed(FIGMA_FILE_URL);
@@ -120,6 +122,29 @@ function isAdmin(req) {
     return false;
   }
   return true;
+}
+
+
+async function saveToGoogleSheets(application, utm) {
+  if (!GOOGLE_SHEETS_WEBHOOK_URL || !GOOGLE_SHEETS_TOKEN) return;
+  const response = await fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      token: GOOGLE_SHEETS_TOKEN,
+      name: application.name,
+      contact: application.email,
+      date: application.date,
+      timeFrom: application.timeFrom,
+      origin: application.origin,
+      destination: application.destination,
+      consentRequired: application.consentRequired,
+      utm,
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || !payload.ok) throw new Error("google_sheets_save_failed");
 }
 
 function parseUtm(searchParams) {
@@ -345,28 +370,20 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req);
       const errors = [];
       const name = String(body.name || "").trim();
-      const email = normalizeEmail(body.email);
+      const email = String(body.email || "").trim();
       const date = String(body.date || "").trim();
       const timeFrom = String(body.timeFrom || "").trim();
       const timeTo = String(body.timeTo || "").trim();
       const origin = String(body.origin || "").trim();
       const destination = String(body.destination || "").trim();
-      const partySize = Number(body.partySize);
-      const flexible = body.flexible;
       const consentRequired = Boolean(body.consentRequired);
-      const consentNews = Boolean(body.consentNews);
 
-      if (!name || name.length > 40) errors.push("name");
-      if (!isKoreaEmail(email)) errors.push("email");
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) errors.push("date");
+      if (name.length > 40) errors.push("name");
+      if (!email || email.length > 80) errors.push("email");
+      if (!date || date.length > 120) errors.push("date");
       if (!timeFrom) errors.push("timeFrom");
-      if (timeTo && timeTo < timeFrom) errors.push("timeTo");
       if (!origin || origin.length > 80) errors.push("origin");
       if (!destination || destination.length > 80) errors.push("destination");
-      if (!Number.isInteger(partySize) || partySize < 1 || partySize > 4) {
-        errors.push("partySize");
-      }
-      if (flexible !== true && flexible !== false) errors.push("flexible");
       if (!consentRequired) errors.push("consentRequired");
 
       if (errors.length) {
@@ -381,6 +398,13 @@ const server = createServer(async (req, res) => {
       const now = new Date().toISOString();
       const utmFromBody = body.utm && typeof body.utm === "object" ? body.utm : {};
 
+      const applicationForSheet = { name, email, date, timeFrom, origin, destination, consentRequired };
+      try {
+        await saveToGoogleSheets(applicationForSheet, utmFromBody);
+      } catch {
+        return sendJson(res, 503, { error: "google_sheets_unavailable" }, withCookies());
+      }
+
       const result = await store.mutate((db) => {
         ensureVisitor(db, visitorId, utmFromBody, now);
         const existing = db.applications.find((a) => a.email === email);
@@ -393,13 +417,9 @@ const server = createServer(async (req, res) => {
           email,
           date,
           timeFrom,
-          timeTo: timeTo || null,
           origin,
           destination,
-          partySize,
-          flexible,
           consentRequired,
-          consentNews,
           createdAt: existing?.createdAt || now,
           updatedAt: now,
           duplicateUpdate: Boolean(existing),

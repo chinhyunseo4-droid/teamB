@@ -17,3 +17,7 @@ services:
         sync: false
       - key: RETENTION_PERIOD
         sync: false
+      - key: GOOGLE_SHEETS_WEBHOOK_URL
+        sync: false
+      - key: GOOGLE_SHEETS_TOKEN
+        sync: false
