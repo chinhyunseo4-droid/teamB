@@ -5,5 +5,8 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
+  },
+  "vars": {
+    "GOOGLE_SHEETS_WEBHOOK_URL": "https://script.google.com/macros/s/AKfycbxmsIf9tp_wAzrJWjLDUfzpNlvHf_K1qqM6i6HhLQ3CVmEqywCj8Iq64hM57kgFTVT-0g/exec"
   }
 }
