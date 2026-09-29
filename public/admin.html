@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>모두의 택시 · 관리자 인사이트</title>
+  <title>모두의 택시 · 관리자 통계</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link rel="stylesheet" href="/styles.css" />
-  <style>.admin-shell{max-width:1040px}.metrics{grid-template-columns:repeat(4,1fr)}.metric b{font-size:30px}.updated{color:#74736f;font-size:13px}.insight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.insight-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px}.insight-card h2{font-size:17px;margin:0 0 5px}.insight-card p{font-size:13px;color:var(--muted);margin:0 0 12px}.empty{color:var(--muted);font-size:13px}.rate{font-weight:800;color:var(--burgundy)}@media(max-width:720px){.metrics,.insight-grid{grid-template-columns:1fr}}</style>
+  <style>.admin-shell{max-width:900px}.metrics{grid-template-columns:repeat(3,1fr)}.metric b{font-size:38px}.updated{color:#74736f;font-size:13px}@media(max-width:640px){.metrics{grid-template-columns:1fr}}</style>
 </head>
 <body>
   <main class="admin-shell">
-    <h1>모두의 택시 관리자 인사이트</h1>
-    <p class="lede">개인정보를 표시하지 않고, 익명 행동·신청 수요·운영 지표를 집계합니다.</p>
+    <h1>모두의 택시 관리자 통계</h1>
+    <p class="lede">방문과 주요 버튼 클릭을 고유 브라우저 기준으로 집계합니다.</p>
     <form id="login" class="form-card" style="max-width:420px">
       <label for="password">관리자 비밀번호</label>
       <input id="password" type="password" required autocomplete="current-password" />
@@ -20,17 +20,9 @@
     </form>
     <section id="dash" hidden>
       <p><button class="btn ghost" id="refresh" type="button">새로고침</button> <button class="btn ghost" id="logout" type="button">로그아웃</button></p>
-      <h2>핵심 퍼널</h2>
       <div id="metrics" class="metrics"></div>
-      <div id="funnel" class="form-card" style="margin-top:16px"></div>
-      <div class="insight-grid">
-        <section class="insight-card"><h2>날짜·구간별 수요</h2><p>어느 구간을 우선 운영할지 판단합니다.</p><div id="routes"></div></section>
-        <section class="insight-card"><h2>시간대별 수요</h2><p>매칭 가능한 시간대가 어디인지 봅니다.</p><div id="times"></div></section>
-        <section class="insight-card"><h2>유입 채널별 전환</h2><p>홍보 채널별 방문과 신청 완료를 비교합니다.</p><div id="channels"></div></section>
-        <section class="insight-card"><h2>운영 품질</h2><p>Google Sheets의 <code>운영지표</code> 탭 숫자를 수정해 관리합니다.</p><div id="operations"></div></section>
-      </div>
       <p id="updated" class="updated"></p>
-      <p class="help">수요·퍼널은 이 기능을 배포한 뒤부터 집계됩니다. 운영 품질 값은 매칭 완료 후 시트에서 직접 입력하세요.</p>
+      <p class="help">집계는 이 기능을 배포한 뒤부터 시작됩니다.</p>
     </section>
   </main>
   <script src="/admin.js" type="module"></script>

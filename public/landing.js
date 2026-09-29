@@ -25,12 +25,12 @@ const visitorId = (() => {
   return value;
 })();
 
-async function track(type, meta = {}) {
+async function track(type) {
   try {
     await fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, visitorId, utm, meta }),
+      body: JSON.stringify({ type, visitorId, utm }),
     });
   } catch {
     /* ignore analytics failures */
@@ -236,7 +236,6 @@ form.addEventListener("submit", async (e) => {
     form.classList.add("hide");
     document.getElementById("success").classList.add("show");
     document.getElementById("success").focus();
-    track("application_submit_success", { route: values.date, timeSlot: values.timeFrom });
     if (json.duplicateUpdate) {
       document.getElementById("duplicate-note").hidden = false;
     }
@@ -249,11 +248,7 @@ form.addEventListener("submit", async (e) => {
 
 // Early-access reservation: email only, no payment is taken on this page.
 const preorderForm = document.getElementById("preorder-form");
-let preorderFormStarted = false;
 if (preorderForm) {
-  preorderForm.addEventListener("focusin", () => {
-    if (!preorderFormStarted) { preorderFormStarted = true; track("preorder_form_start"); }
-  }, true);
   const preorderStatus = document.getElementById("preorder-status");
   const preorderSubmit = document.getElementById("preorder-submit-btn");
   const preorderSuccess = document.getElementById("preorder-success");
