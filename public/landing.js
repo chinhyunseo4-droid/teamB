@@ -119,39 +119,54 @@ document.querySelectorAll("[data-preorder-cta]").forEach((el) => {
   el.addEventListener("click", () => track("preorder_click"));
 });
 
-const timeSlotsByRoute = {
-  "10월 2일(금) | 잠실 → 목적지": [
-    "14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후",
-  ],
-  "10월 3일(토) | 목동운동장주경기장 → 안암": [
-    "14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후",
-  ],
-  "10월 3일(토) 밤 ~ 10월 4일(일) 새벽 | 안암 → 목적지": [
-    "22:00~23:00", "23:00~24:00", "10월 4일 00:00~01:00", "10월 4일 01:00~02:00", "10월 4일 02:00~03:00", "10월 4일 03:00~04:00", "10월 4일 04:00 이후",
-  ],
+const routeOptions = {
+  "10월 2일(금) | 잠실 → 목적지": {
+    timeSlots: ["14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후"],
+    origins: ["잠실종합운동장", "종합운동장역", "잠실역", "기타"],
+    destinations: ["안암·고려대", "성신여대", "혜화", "동대문", "종로", "홍대·신촌", "강남", "잠실·송파", "기타"],
+  },
+  "10월 3일(토) | 목동운동장주경기장 → 안암": {
+    timeSlots: ["14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후"],
+    origins: ["목동운동장주경기장"],
+    destinations: ["안암"],
+  },
+  "10월 3일(토) 밤 ~ 10월 4일(일) 새벽 | 안암 → 목적지": {
+    timeSlots: ["22:00~23:00", "23:00~24:00", "10월 4일 00:00~01:00", "10월 4일 01:00~02:00", "10월 4일 02:00~03:00", "10월 4일 03:00~04:00", "10월 4일 04:00 이후"],
+    origins: ["고려대역", "안암역", "기타"],
+    destinations: ["잠실종합운동장", "잠실역", "강남", "홍대·신촌", "혜화", "동대문", "종로", "기타"],
+  },
 };
 
 const routeSelect = document.getElementById("date");
 const timeSelect = document.getElementById("timeFrom");
-function updateTimeSlots() {
-  const slots = timeSlotsByRoute[routeSelect.value] || [];
-  const previous = timeSelect.value;
-  timeSelect.replaceChildren();
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = slots.length ? "선택해 주세요" : "날짜·구간을 먼저 선택해 주세요";
-  timeSelect.append(placeholder);
-  slots.forEach((slot) => {
+const originSelect = document.getElementById("origin");
+const destinationSelect = document.getElementById("destination");
+
+function setOptions(select, values, placeholder, previous) {
+  select.replaceChildren();
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = values.length ? placeholder : "날짜·구간을 먼저 선택해 주세요";
+  select.append(placeholderOption);
+  values.forEach((value) => {
     const option = document.createElement("option");
-    option.value = slot;
-    option.textContent = slot;
-    timeSelect.append(option);
+    option.value = value;
+    option.textContent = value;
+    select.append(option);
   });
-  timeSelect.disabled = slots.length === 0;
-  if (slots.includes(previous)) timeSelect.value = previous;
+  select.disabled = values.length === 0;
+  if (values.includes(previous)) select.value = previous;
+  else if (values.length === 1) select.value = values[0];
 }
-routeSelect?.addEventListener("change", updateTimeSlots);
-updateTimeSlots();
+
+function updateRouteOptions(reset = false) {
+  const options = routeOptions[routeSelect.value] || {};
+  setOptions(timeSelect, options.timeSlots || [], "선택해 주세요", reset ? "" : timeSelect.value);
+  setOptions(originSelect, options.origins || [], "선택해 주세요", reset ? "" : originSelect.value);
+  setOptions(destinationSelect, options.destinations || [], "선택해 주세요", reset ? "" : destinationSelect.value);
+}
+routeSelect?.addEventListener("change", () => updateRouteOptions(true));
+updateRouteOptions();
 const form = document.getElementById("apply-form");
 let formStarted = false;
 form.addEventListener(
