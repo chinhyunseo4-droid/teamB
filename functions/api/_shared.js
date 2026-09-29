@@ -28,7 +28,7 @@ export async function saveToGoogleSheets(env, application, utm) {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({
-      token,
+      token,`n      recordType: application.recordType || "application",
       name: application.name,
       contact: application.email,
       date: application.date,

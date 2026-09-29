@@ -1,9 +1,11 @@
+import { onRequestPost as analyticsPost } from "../functions/api/analytics.js";
 import { onRequestPost as applyPost } from "../functions/api/apply.js";
 import { onRequestGet as configGet } from "../functions/api/config.js";
 import { onRequestPost as preorderPost } from "../functions/api/preorder.js";
 import { onRequestPost as trackPost } from "../functions/api/track.js";
 
 const apiRoutes = {
+  "/api/analytics": { POST: analyticsPost },
   "/api/apply": { POST: applyPost },
   "/api/config": { GET: configGet },
   "/api/preorder": { POST: preorderPost },

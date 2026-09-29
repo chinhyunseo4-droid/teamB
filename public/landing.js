@@ -18,13 +18,19 @@ function readUtm() {
 }
 
 const utm = readUtm();
+const visitorId = (() => {
+  const key = "modutaxi_visitor_id";
+  let value = localStorage.getItem(key);
+  if (!value) { value = crypto.randomUUID(); localStorage.setItem(key, value); }
+  return value;
+})();
 
 async function track(type) {
   try {
     await fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, utm }),
+      body: JSON.stringify({ type, visitorId, utm }),
     });
   } catch {
     /* ignore analytics failures */
@@ -106,8 +112,11 @@ fetch("/preview-slides.json").then((response) => response.json()).then(async (im
 
 track("page_view");
 
-document.querySelectorAll("[data-cta]").forEach((el) => {
-  el.addEventListener("click", () => track("cta_click"));
+document.querySelectorAll("[data-free-trial-cta]").forEach((el) => {
+  el.addEventListener("click", () => track("free_trial_click"));
+});
+document.querySelectorAll("[data-preorder-cta]").forEach((el) => {
+  el.addEventListener("click", () => track("preorder_click"));
 });
 
 const timeSlotsByRoute = {
