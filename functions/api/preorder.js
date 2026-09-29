@@ -11,7 +11,8 @@ export async function onRequestPost({ request, env }) {
 
   try {
     await saveToGoogleSheets(env, {
-      recordType: "preorder",`n      name: "사전 예약 990원",
+      recordType: "preorder",
+      name: "사전 예약 990원",
       email,
       date: "정식 출시 알림",
       timeFrom: "990원 이용 혜택",
