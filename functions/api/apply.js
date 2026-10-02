@@ -5,17 +5,20 @@ export async function onRequestPost({ request, env }) {
   if (!body) return json({ error: "invalid_json" }, 400);
 
   const name = String(body.name || "").trim();
-  const email = String(body.email || "").trim();
+  const contactType = String(body.contactType || "").trim();
+  const contact = String(body.contact || "").trim();
   const date = String(body.date || "").trim();
   const timeFrom = String(body.timeFrom || "").trim();
   const origin = String(body.origin || "").trim();
   const destination = String(body.destination || "").trim();
   const consentRequired = body.consentRequired === true;
-  const invalid = name.length > 40 || !email || email.length > 80 || !date || date.length > 120 || !timeFrom || !origin || origin.length > 80 || !destination || destination.length > 80 || !consentRequired;
+  const validContactType = ["phone", "email", "x"].includes(contactType);
+  const validContact = contactType === "email" ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) : contactType === "phone" ? /^[0-9+\-\s()]{7,30}$/.test(contact) : /^@?[A-Za-z0-9_]{1,15}$/.test(contact);
+  const invalid = name.length > 40 || !validContactType || !validContact || contact.length > 120 || !date || date.length > 10 || !timeFrom || !origin || origin.length > 200 || !destination || destination.length > 200 || !consentRequired;
   if (invalid) return json({ error: "validation" }, 400);
 
   try {
-    await saveToGoogleSheets(env, { name, email, date, timeFrom, origin, destination, consentRequired }, utmFromBody(body.utm));
+    await saveToGoogleSheets(env, { name, contactType, contact, date, timeFrom, origin, destination, consentRequired }, utmFromBody(body.utm));
     return json({ ok: true });
   } catch {
     return json({ error: "google_sheets_unavailable" }, 503);

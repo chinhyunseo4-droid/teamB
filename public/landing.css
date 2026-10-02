@@ -128,7 +128,7 @@
 .form-section-title span { color: var(--burgundy); font-size: 11px; margin-right: 9px; }
 .form-section-title:not(:first-child) { margin-top: 34px; padding-top: 28px; border-top: 1px solid #eeede7; }
 .landing label { font-size: 12px; color: #4c4c44; margin-top: 20px; }
-.landing input, .landing select { border-radius: 8px; border-color: #e4e3dc; padding: 13px 12px; font-size: 13px; background: #fff; color: var(--ink); min-width: 0; }
+.landing input, .landing select, .landing textarea { border-radius: 8px; border-color: #e4e3dc; padding: 13px 12px; font-size: 13px; background: #fff; color: var(--ink); min-width: 0; }
 .landing input::placeholder { color: #aaa99e; }
 .landing .help { font-size: 10px; color: #919186; }
 .landing .check { font-size: 11px; font-weight: 400; line-height: 1.7; margin-top: 12px; }
@@ -228,7 +228,7 @@
   .apply-note { margin: 16px 0; }
   .apply-note p { font-size: 11px; }
   .landing .form-card { padding: 22px 19px; }
-  .landing input, .landing select { font-size: 16px; }
+  .landing input, .landing select, .landing textarea { font-size: 16px; }
   .landing input::placeholder { font-size: 12px; }
   .landing .faq { padding: 54px 0; }
   .landing .faq summary { font-size: 13px; }

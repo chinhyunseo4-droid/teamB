@@ -119,55 +119,46 @@ document.querySelectorAll("[data-preorder-cta]").forEach((el) => {
   el.addEventListener("click", () => track("preorder_click"));
 });
 
-const routeOptions = {
-  "10월 2일(금) | 잠실 → 목적지": {
-    timeSlots: ["14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후"],
-    origins: ["잠실종합운동장", "종합운동장역", "잠실역", "기타"],
-    destinations: ["안암·고려대", "성신여대", "혜화", "동대문", "종로", "홍대·신촌", "강남", "잠실·송파", "기타"],
-  },
-  "10월 3일(토) | 목동운동장주경기장 → 안암": {
-    timeSlots: ["14:00~15:00", "15:00~16:00", "16:00~17:00", "17:00~18:00", "18:00~19:00", "19:00 이후"],
-    origins: ["목동운동장주경기장"],
-    destinations: ["안암"],
-  },
-  "10월 3일(토) 밤 ~ 10월 4일(일) 새벽 | 안암 → 목적지": {
-    timeSlots: ["22:00~23:00", "23:00~24:00", "10월 4일 00:00~01:00", "10월 4일 01:00~02:00", "10월 4일 02:00~03:00", "10월 4일 03:00~04:00", "10월 4일 04:00 이후"],
-    origins: ["고려대역", "안암역", "기타"],
-    destinations: ["잠실종합운동장", "잠실역", "강남", "홍대·신촌", "혜화", "동대문", "종로", "기타"],
-  },
+const dateInput = document.getElementById("date");
+const timeInput = document.getElementById("timeFrom");
+const contactTypeSelect = document.getElementById("contactType");
+const contactInput = document.getElementById("contact");
+const contactHelp = document.getElementById("contact-help");
+
+function formatLocalDate(date) {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+}
+if (dateInput) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  dateInput.min = formatLocalDate(tomorrow);
+}
+if (timeInput) {
+  for (let hour = 0; hour < 24; hour += 1) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      const value = String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      timeInput.append(option);
+    }
+  }
+}
+const contactConfigurations = {
+  phone: { placeholder: "010-0000-0000", inputMode: "tel", autocomplete: "tel", help: "매칭 안내를 받을 전화번호를 입력해 주세요." },
+  email: { placeholder: "example@gmail.com", inputMode: "email", autocomplete: "email", help: "매칭 안내를 받을 이메일 주소를 입력해 주세요." },
+  x: { placeholder: "@username", inputMode: "text", autocomplete: "off", help: "매칭 안내를 받을 X 계정(@username)을 입력해 주세요." },
 };
-
-const routeSelect = document.getElementById("date");
-const timeSelect = document.getElementById("timeFrom");
-const originSelect = document.getElementById("origin");
-const destinationSelect = document.getElementById("destination");
-
-function setOptions(select, values, placeholder, previous) {
-  select.replaceChildren();
-  const placeholderOption = document.createElement("option");
-  placeholderOption.value = "";
-  placeholderOption.textContent = values.length ? placeholder : "날짜·구간을 먼저 선택해 주세요";
-  select.append(placeholderOption);
-  values.forEach((value) => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value;
-    select.append(option);
-  });
-  select.disabled = values.length === 0;
-  if (values.includes(previous)) select.value = previous;
-  else if (values.length === 1) select.value = values[0];
+function updateContactInput() {
+  const config = contactConfigurations[contactTypeSelect?.value] || contactConfigurations.phone;
+  contactInput.placeholder = config.placeholder;
+  contactInput.inputMode = config.inputMode;
+  contactInput.autocomplete = config.autocomplete;
+  contactHelp.textContent = config.help;
 }
-
-function updateRouteOptions(reset = false) {
-  const options = routeOptions[routeSelect.value] || {};
-  setOptions(timeSelect, options.timeSlots || [], "선택해 주세요", reset ? "" : timeSelect.value);
-  setOptions(originSelect, options.origins || [], "선택해 주세요", reset ? "" : originSelect.value);
-  setOptions(destinationSelect, options.destinations || [], "선택해 주세요", reset ? "" : destinationSelect.value);
-}
-routeSelect?.addEventListener("change", () => updateRouteOptions(true));
-updateRouteOptions();
-const form = document.getElementById("apply-form");
+contactTypeSelect?.addEventListener("change", updateContactInput);
+updateContactInput();const form = document.getElementById("apply-form");
 let formStarted = false;
 form.addEventListener(
   "focusin",
@@ -181,11 +172,17 @@ form.addEventListener(
 
 const fields = {
   name: () => true,
-  email: (v) => v.trim().length > 0 && v.trim().length <= 80,
-  date: (v) => Boolean(v),
-  timeFrom: (v) => Boolean(v),
-  origin: (v) => Boolean(v),
-  destination: (v) => Boolean(v),
+  contact: (v, all) => {
+    const value = v.trim();
+    if (!value || value.length > 120) return false;
+    if (all.contactType === "email") return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    if (all.contactType === "phone") return /^[0-9+\-\s()]{7,30}$/.test(value);
+    return /^@?[A-Za-z0-9_]{1,15}$/.test(value);
+  },
+  date: (v) => Boolean(v) && v >= dateInput.min,
+  timeFrom: (v) => /^\d{2}:\d{2}$/.test(v),
+  origin: (v) => v.trim().length > 0 && v.trim().length <= 200,
+  destination: (v) => v.trim().length > 0 && v.trim().length <= 200,
   consentRequired: (_v, all) => all.consentRequired === true,
 };
 
@@ -193,18 +190,15 @@ function readForm() {
   const data = new FormData(form);
   return {
     name: String(data.get("name") || ""),
-    email: String(data.get("email") || ""),
+    contactType: String(data.get("contactType") || "phone"),
+    contact: String(data.get("contact") || ""),
     date: String(data.get("date") || ""),
     timeFrom: String(data.get("timeFrom") || ""),
-    timeTo: String(data.get("timeTo") || ""),
     origin: String(data.get("origin") || ""),
     destination: String(data.get("destination") || ""),
-    partySize: String(data.get("partySize") || ""),
-    flexible: data.get("flexible"),
     consentRequired: data.get("consentRequired") === "on",
   };
 }
-
 function setInvalid(name, on) {
   const el = form.querySelector(`[data-field="${name}"]`);
   if (el) el.classList.toggle("invalid", on);
@@ -241,8 +235,6 @@ form.addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...values,
-        partySize: Number(values.partySize),
-        flexible: values.flexible === "true",
         utm,
       }),
     });

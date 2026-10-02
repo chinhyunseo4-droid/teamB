@@ -134,7 +134,8 @@ async function saveToGoogleSheets(application, utm) {
     body: JSON.stringify({
       token: GOOGLE_SHEETS_TOKEN,
       name: application.name,
-      contact: application.email,
+      contact: application.contact || application.email,
+      contactType: application.contactType || "email",
       date: application.date,
       timeFrom: application.timeFrom,
       origin: application.origin,
@@ -381,7 +382,8 @@ const server = createServer(async (req, res) => {
       try {
         await saveToGoogleSheets({
           name: "사전 예약 990원",
-          email,
+          email: contact,
+          contactType,
           date: "정식 출시 알림",
           timeFrom: "990원 이용 혜택",
           origin: "",
@@ -398,7 +400,8 @@ const server = createServer(async (req, res) => {
         const record = {
           id: existing?.id || randomUUID(),
           visitorId,
-          email,
+          email: contact,
+          contactType,
           consentRequired,
           offerPrice: 990,
           regularPrice: 3000,
@@ -422,7 +425,8 @@ const server = createServer(async (req, res) => {
       const body = await readBody(req);
       const errors = [];
       const name = String(body.name || "").trim();
-      const email = String(body.email || "").trim();
+      const contactType = String(body.contactType || "").trim();
+      const contact = String(body.contact || "").trim();
       const date = String(body.date || "").trim();
       const timeFrom = String(body.timeFrom || "").trim();
       const timeTo = String(body.timeTo || "").trim();
@@ -431,11 +435,12 @@ const server = createServer(async (req, res) => {
       const consentRequired = Boolean(body.consentRequired);
 
       if (name.length > 40) errors.push("name");
-      if (!email || email.length > 80) errors.push("email");
-      if (!date || date.length > 120) errors.push("date");
+      if (!["phone", "email", "x"].includes(contactType)) errors.push("contact");
+      if (!contact || contact.length > 120) errors.push("contact");
+      if (!date || date.length > 10) errors.push("date");
       if (!timeFrom) errors.push("timeFrom");
-      if (!origin || origin.length > 80) errors.push("origin");
-      if (!destination || destination.length > 80) errors.push("destination");
+      if (!origin || origin.length > 200) errors.push("origin");
+      if (!destination || destination.length > 200) errors.push("destination");
       if (!consentRequired) errors.push("consentRequired");
 
       if (errors.length) {
@@ -450,7 +455,7 @@ const server = createServer(async (req, res) => {
       const now = new Date().toISOString();
       const utmFromBody = body.utm && typeof body.utm === "object" ? body.utm : {};
 
-      const applicationForSheet = { name, email, date, timeFrom, origin, destination, consentRequired };
+      const applicationForSheet = { name, contactType, contact, date, timeFrom, origin, destination, consentRequired };
       try {
         await saveToGoogleSheets(applicationForSheet, utmFromBody);
       } catch {
@@ -459,14 +464,15 @@ const server = createServer(async (req, res) => {
 
       const result = await store.mutate((db) => {
         ensureVisitor(db, visitorId, utmFromBody, now);
-        const existing = db.applications.find((a) => a.email === email);
+        const existing = db.applications.find((a) => a.email === contact);
         const record = {
           ...applicationDefaults(),
           ...existing,
           id: existing?.id || randomUUID(),
           visitorId,
           name,
-          email,
+          email: contact,
+          contactType,
           date,
           timeFrom,
           origin,
@@ -477,7 +483,7 @@ const server = createServer(async (req, res) => {
           duplicateUpdate: Boolean(existing),
         };
         if (existing) {
-          const idx = db.applications.findIndex((a) => a.email === email);
+          const idx = db.applications.findIndex((a) => a.email === contact);
           db.applications[idx] = record;
         } else {
           db.applications.push(record);
@@ -543,7 +549,7 @@ const server = createServer(async (req, res) => {
           return sendJson(res, 400, { error: "select_two_applicants" });
         }
         const result = await store.mutate((db) => {
-          const apps = emails.map((email) => db.applications.find((a) => a.email === email));
+          const apps = emails.map((email) => db.applications.find((a) => a.email === contact));
           if (apps.some((a) => !a)) return { status: 404, error: "application_not_found" };
           if (apps.some((a) => a.matchGroupId || a.matchStatus !== "unmatched")) {
             return { status: 409, error: "already_grouped" };
