@@ -37,6 +37,8 @@ export async function saveToGoogleSheets(env, application, utm) {
       timeFrom: application.timeFrom,
       origin: application.origin,
       destination: application.destination,
+      gender: application.gender,
+      genderPreference: application.genderPreference,
       consentRequired: application.consentRequired,
       utm,
     }),

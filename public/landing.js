@@ -183,6 +183,8 @@ const fields = {
   timeFrom: (v) => /^\d{2}:\d{2}$/.test(v),
   origin: (v) => v.trim().length > 0 && v.trim().length <= 200,
   destination: (v) => v.trim().length > 0 && v.trim().length <= 200,
+  gender: (v) => ["female", "male", "other"].includes(v),
+  genderPreference: (v) => ["same_gender_only", "any_gender"].includes(v),
   consentRequired: (_v, all) => all.consentRequired === true,
 };
 
@@ -196,6 +198,8 @@ function readForm() {
     timeFrom: String(data.get("timeFrom") || ""),
     origin: String(data.get("origin") || ""),
     destination: String(data.get("destination") || ""),
+    gender: String(data.get("gender") || ""),
+    genderPreference: String(data.get("genderPreference") || ""),
     consentRequired: data.get("consentRequired") === "on",
   };
 }
